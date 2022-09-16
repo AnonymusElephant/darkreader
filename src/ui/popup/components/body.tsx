@@ -10,7 +10,6 @@ import NewBody from '../body';
 import MoreSettings from './more-settings';
 import {NewsGroup, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
-import ThemeEngines from '../../../generators/theme-engines';
 import {getDuration} from '../../../utils/time';
 import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
@@ -96,14 +95,6 @@ function Body(props: BodyProps & {fonts: string[]}) {
         }
     }
 
-    const globalThemeEngine = props.data.settings.theme.engine;
-    const devtoolsData = props.data.devtools;
-    const hasCustomFixes = (
-        (globalThemeEngine === ThemeEngines.dynamicTheme && devtoolsData.hasCustomDynamicFixes) ||
-        ([ThemeEngines.cssFilter, ThemeEngines.svgFilter].includes(globalThemeEngine) && devtoolsData.hasCustomFilterFixes) ||
-        (globalThemeEngine === ThemeEngines.staticTheme && devtoolsData.hasCustomStaticFixes)
-    );
-
     function toggleMoreToggleSettings() {
         setState({moreToggleSettingsOpen: !state.moreToggleSettingsOpen});
     }
@@ -158,13 +149,7 @@ function Body(props: BodyProps & {fonts: string[]}) {
                         <span class="donate-link__text">{getLocalMessage('donate')}</span>
                     </a>
                     <NewsButton active={state.newsOpen} count={displayedNewsCount} onClick={toggleNews} />
-                    <Button
-                        onclick={openDevTools}
-                        class={{
-                            'dev-tools-button': true,
-                            'dev-tools-button--has-custom-fixes': hasCustomFixes,
-                        }}
-                    >
+                    <Button onclick={openDevTools} class="dev-tools-button">
                         🛠 {getLocalMessage('open_dev_tools')}
                     </Button>
                 </div>

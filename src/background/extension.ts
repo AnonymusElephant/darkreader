@@ -10,7 +10,7 @@ import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getCommands, setShortcut, canInjectScript} from './utils/extension-api';
 import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextTimeChangeAtLocation} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
-import ThemeEngines from '../generators/theme-engines';
+import {ThemeEngine} from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
@@ -268,7 +268,7 @@ export class Extension {
             }
             case 'switchEngine': {
                 logInfo('Switch Engine command entered');
-                const engines = Object.values(ThemeEngines);
+                const engines = Object.values(ThemeEngine);
                 const index = engines.indexOf(UserStorage.settings.theme.engine);
                 const next = engines[(index + 1) % engines.length];
                 this.setTheme({engine: next});
@@ -334,9 +334,6 @@ export class Extension {
             dynamicFixesText,
             filterFixesText,
             staticThemesText,
-            hasCustomDynamicFixes,
-            hasCustomFilterFixes,
-            hasCustomStaticFixes,
             activeTab
         ] = await Promise.all([
             Newsmaker.getLatest(),
@@ -344,9 +341,6 @@ export class Extension {
             DevTools.getDynamicThemeFixesText(),
             DevTools.getInversionFixesText(),
             DevTools.getStaticThemesText(),
-            DevTools.hasCustomDynamicThemeFixes(),
-            DevTools.hasCustomFilterFixes(),
-            DevTools.hasCustomStaticFixes(),
             this.getActiveTabInfo()
         ]);
         return {
@@ -361,9 +355,6 @@ export class Extension {
                 dynamicFixesText,
                 filterFixesText,
                 staticThemesText,
-                hasCustomDynamicFixes,
-                hasCustomFilterFixes,
-                hasCustomStaticFixes,
             },
             activeTab,
         };
@@ -584,7 +575,7 @@ export class Extension {
             logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
             The theme(${custom ? 'custom' : preset ? 'preset' : 'global'} settings) used is: ${JSON.stringify(theme)}`);
             switch (theme.engine) {
-                case ThemeEngines.cssFilter: {
+                case ThemeEngine.cssFilter: {
                     return {
                         type: MessageType.BG_ADD_CSS_FILTER,
                         data: {
@@ -593,7 +584,7 @@ export class Extension {
                         },
                     };
                 }
-                case ThemeEngines.svgFilter: {
+                case ThemeEngine.svgFilter: {
                     if (isFirefox) {
                         return {
                             type: MessageType.BG_ADD_CSS_FILTER,
@@ -613,7 +604,7 @@ export class Extension {
                         },
                     };
                 }
-                case ThemeEngines.staticTheme: {
+                case ThemeEngine.staticTheme: {
                     return {
                         type: MessageType.BG_ADD_STATIC_THEME,
                         data: {
@@ -624,7 +615,7 @@ export class Extension {
                         },
                     };
                 }
-                case ThemeEngines.dynamicTheme: {
+                case ThemeEngine.dynamicTheme: {
                     const fixes = getDynamicThemeFixesFor(url, frameURL, ConfigManager.DYNAMIC_THEME_FIXES_RAW, ConfigManager.DYNAMIC_THEME_FIXES_INDEX, UserStorage.settings.enableForPDF);
                     return {
                         type: MessageType.BG_ADD_DYNAMIC_THEME,
